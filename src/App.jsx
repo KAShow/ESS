@@ -2,6 +2,8 @@ import React, { useState } from 'react'
 import { styled } from 'styled-components'
 import logo from './assets/logo-legal.png'
 import { saveSurvey } from './utils/storage'
+import SurveysList from './components/SurveysList'
+import LoginScreen from './components/LoginScreen'
 
 const services = [
   "نظافة مواقع العمل",
@@ -160,9 +162,44 @@ const Button = styled.button`
   }
 `
 
+const ViewSurveysButton = styled.button`
+  background-color: #4A4032;
+  color: #C5A572;
+  border: 2px solid #C5A572;
+  padding: 0.8rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  position: fixed;
+  top: 2rem;
+  left: 2rem;
+  font-family: inherit;
+  font-size: 1.1rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  z-index: 1000;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+
+  &:hover {
+    background-color: #C5A572;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  &::before {
+    content: '📋';
+    font-size: 1.2rem;
+  }
+`
+
 function App() {
   const [ratings, setRatings] = useState(initialState);
-  
+  const [showSurveys, setShowSurveys] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
   const handleRatingChange = (service, value) => {
     setRatings(prev => ({
       ...prev,
@@ -209,8 +246,27 @@ function App() {
     calendar: 'gregory'
   })
 
+  if (showSurveys) {
+    if (!isAuthenticated) {
+      return (
+        <LoginScreen 
+          onLogin={() => setIsAuthenticated(true)}
+          onBack={() => setShowSurveys(false)}
+        />
+      );
+    }
+    return <SurveysList onBack={() => {
+      setShowSurveys(false);
+      setIsAuthenticated(false);
+    }} />;
+  }
+
   return (
     <Container>
+      <ViewSurveysButton onClick={() => setShowSurveys(true)}>
+        عرض الاستبيانات
+      </ViewSurveysButton>
+      
       <Header>
         <LogoContainer>
           <Logo src={logo} alt="شعار هيئة التشريع والرأي القانوني" />
