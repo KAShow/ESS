@@ -3,21 +3,31 @@ import mongoose from 'mongoose';
 const surveySchema = new mongoose.Schema({
   name: {
     type: String,
-    required: true
+    required: false
   },
   email: {
     type: String,
-    required: true
+    required: false
   },
-  satisfaction: {
-    type: Number,
-    required: true,
-    min: 1,
-    max: 5
-  },
-  feedback: {
+  department: {
     type: String,
-    required: true
+    required: false
+  },
+  services: {
+    type: Map,
+    of: {
+      rating: {
+        type: Number,
+        min: 1,
+        max: 5,
+        required: false
+      },
+      notes: {
+        type: String,
+        required: false
+      }
+    },
+    required: false
   },
   createdAt: {
     type: Date,
