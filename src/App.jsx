@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { styled } from 'styled-components'
 import logo from './assets/logo-legal.png'
 import { saveSurvey } from './utils/storage'
+import { sendSurveyEmail } from './utils/emailService'
 import SurveysList from './components/SurveysList'
 import LoginScreen from './components/LoginScreen'
 
@@ -214,30 +215,39 @@ function App() {
     }));
   };
 
-  const handleSubmit = async () => {
-    const allRated = Object.entries(ratings).every(([service, item]) => 
-      service === "أخرى: يرجى تحديدها" || item.rating > 0
-    );
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     
-    if (!allRated) {
-      alert("الرجاء تقييم جميع الخدمات");
+    // التحقق من صحة النموذج
+    const hasInvalidService = Object.entries(ratings).some(([service, data]) => {
+      if (service === 'أخرى: يرجى تحديدها') {
+        return data.notes.trim() === '';
+      }
+      return data.rating === 0;
+    });
+
+    if (hasInvalidService) {
+      alert('الرجاء تقييم جميع الخدمات وإضافة ملاحظة للخدمات الأخرى');
       return;
     }
 
     try {
+      // حفظ البيانات
       const result = await saveSurvey(ratings);
+      
       if (result.success) {
-        alert("تم إرسال الاستبيان بنجاح!");
+        // إرسال البريد الإلكتروني
+        await sendSurveyEmail(ratings);
+        
         // إعادة تعيين النموذج
         setRatings(initialState);
-      } else {
-        alert("حدث خطأ أثناء حفظ الاستبيان. الرجاء المحاولة مرة أخرى.");
+        alert('شكراً لك! تم إرسال تقييمك بنجاح');
       }
     } catch (error) {
-      console.error('Error submitting survey:', error);
-      alert("حدث خطأ أثناء حفظ الاستبيان. الرجاء المحاولة مرة أخرى.");
+      console.error('Error:', error);
+      alert('عذراً، حدث خطأ أثناء حفظ التقييم');
     }
-  }
+  };
 
   const today = new Date().toLocaleDateString('ar', {
     year: 'numeric',
@@ -277,10 +287,7 @@ function App() {
         </HeaderTitle>
       </Header>
 
-      <form onSubmit={(e) => {
-        e.preventDefault();
-        handleSubmit();
-      }}>
+      <form onSubmit={handleSubmit}>
         <ServicesGrid>
           {services.map((service, index) => (
             <ServiceContainer key={index}>
