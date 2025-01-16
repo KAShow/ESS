@@ -167,34 +167,35 @@ const ViewSurveysButton = styled.button`
   background-color: #4A4032;
   color: #C5A572;
   border: 2px solid #C5A572;
-  padding: 0.8rem 1.5rem;
+  padding: 0.8rem 2rem;
   border-radius: 8px;
   cursor: pointer;
-  position: fixed;
-  top: 2rem;
-  left: 2rem;
   font-family: inherit;
   font-size: 1.1rem;
   font-weight: 500;
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  z-index: 1000;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin: 2rem auto 0;
   transition: all 0.3s ease;
 
   &:hover {
     background-color: #C5A572;
     color: white;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   }
 
   &::before {
     content: '📋';
     font-size: 1.2rem;
   }
-`
+`;
+
+const Footer = styled.footer`
+  text-align: center;
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid #eee;
+`;
 
 function App() {
   const [ratings, setRatings] = useState(initialState);
@@ -273,16 +274,12 @@ function App() {
 
   return (
     <Container>
-      <ViewSurveysButton onClick={() => setShowSurveys(true)}>
-        عرض الاستبيانات
-      </ViewSurveysButton>
-      
       <Header>
         <LogoContainer>
           <Logo src={logo} alt="شعار هيئة التشريع والرأي القانوني" />
         </LogoContainer>
         <HeaderTitle>
-          <Title>استبانة قياس رضا عن الخدمات الإدارية</Title>
+          <Title>استبيان قياس رضا عن الخدمات الإدارية</Title>
           <DateDisplay>التاريخ: {today}</DateDisplay>
         </HeaderTitle>
       </Header>
@@ -320,10 +317,13 @@ function App() {
         </div>
       </form>
 
-      <div style={{ textAlign: 'center', marginTop: '3rem', paddingTop: '2rem', borderTop: '1px solid #C5A572', color: '#4A4032' }}>
+      <Footer>
         <p>شاكرين ومقدرين للجميع حسن التعاون معنا</p>
         <p>إدارة الموارد البشرية والمالية</p>
-      </div>
+        <ViewSurveysButton onClick={() => setShowSurveys(true)}>
+          عرض الاستبيانات
+        </ViewSurveysButton>
+      </Footer>
     </Container>
   )
 }
