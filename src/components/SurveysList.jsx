@@ -23,12 +23,6 @@ const Table = styled.table`
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 `;
 
-const InnerTable = styled.table`
-  width: 100%;
-  border-collapse: collapse;
-  margin: 0;
-`;
-
 const Th = styled.th`
   background: #4A4032;
   color: #C5A572;
@@ -37,139 +31,77 @@ const Th = styled.th`
   font-weight: 500;
 `;
 
-const InnerTh = styled.th`
-  background: #f5f5f5;
-  color: #4A4032;
-  padding: 0.5rem;
-  text-align: right;
-  font-weight: 500;
-  border-bottom: 1px solid #eee;
-`;
-
 const Td = styled.td`
-  padding: ${props => props.noPadding ? '0' : '1rem'};
+  padding: 1rem;
   border-bottom: 1px solid #eee;
-`;
-
-const InnerTd = styled.td`
-  padding: 0.5rem;
-  border-bottom: 1px solid #f5f5f5;
-  
-  &:first-child {
-    width: 200px;
-  }
-  
-  &:nth-child(2) {
-    width: 100px;
-  }
-`;
-
-const Tr = styled.tr`
-  &:nth-child(even) {
-    background: #f9f9f9;
-  }
-`;
-
-const InnerTr = styled.tr`
-  &:last-child td {
-    border-bottom: none;
-  }
 `;
 
 const BackButton = styled.button`
-  background-color: #C5A572;
-  color: white;
+  background: #4A4032;
+  color: #C5A572;
   border: none;
   padding: 0.5rem 1rem;
   border-radius: 4px;
   cursor: pointer;
   margin-bottom: 1rem;
-
+  
   &:hover {
-    background-color: #9A7B4F;
+    background: #5A5042;
   }
-`;
-
-const NoSurveys = styled.div`
-  text-align: center;
-  padding: 2rem;
-  color: #666;
-`;
-
-const Stars = styled.span`
-  color: #C5A572;
 `;
 
 function SurveysList({ onBack }) {
   const [surveys, setSurveys] = useState([]);
 
   useEffect(() => {
-    setSurveys(getAllSurveys().reverse());
+    const fetchSurveys = async () => {
+      try {
+        const data = await getAllSurveys();
+        setSurveys(Array.isArray(data) ? data : []);
+      } catch (error) {
+        console.error('Error fetching surveys:', error);
+        setSurveys([]);
+      }
+    };
+
+    fetchSurveys();
   }, []);
-
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('ar', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-
-  const renderStars = (rating) => {
-    return rating > 0 ? '★'.repeat(rating) + '☆'.repeat(3 - rating) : '-';
-  };
 
   return (
     <Container>
-      <BackButton onClick={onBack}>عودة إلى الاستبيان</BackButton>
-      <Title>الاستبيانات المستلمة</Title>
-      
-      {surveys.length === 0 ? (
-        <NoSurveys>لا توجد استبيانات مستلمة</NoSurveys>
-      ) : (
-        <Table>
-          <thead>
-            <tr>
-              <Th>التاريخ</Th>
-              <Th>تفاصيل التقييم</Th>
+      <BackButton onClick={onBack}>عودة</BackButton>
+      <Title>قائمة الاستبيانات</Title>
+      <Table>
+        <thead>
+          <tr>
+            <Th>الاسم</Th>
+            <Th>البريد الإلكتروني</Th>
+            <Th>القسم</Th>
+            <Th>التقييمات</Th>
+            <Th>التاريخ</Th>
+          </tr>
+        </thead>
+        <tbody>
+          {surveys.map((survey) => (
+            <tr key={survey._id}>
+              <Td>{survey.name || 'غير متوفر'}</Td>
+              <Td>{survey.email || 'غير متوفر'}</Td>
+              <Td>{survey.department || 'غير متوفر'}</Td>
+              <Td>
+                {survey.services ? 
+                  Object.entries(survey.services).map(([service, data]) => (
+                    <div key={service}>
+                      {service}: {data.rating}/5 - {data.notes || 'لا توجد ملاحظات'}
+                    </div>
+                  ))
+                  : 'لا توجد تقييمات'
+                }
+              </Td>
+              <Td>{new Date(survey.createdAt).toLocaleDateString('ar')}</Td>
             </tr>
-          </thead>
-          <tbody>
-            {surveys.map((survey) => (
-              <Tr key={survey.id}>
-                <Td>{formatDate(survey.date)}</Td>
-                <Td noPadding>
-                  <InnerTable>
-                    <thead>
-                      <tr>
-                        <InnerTh>الخدمة</InnerTh>
-                        <InnerTh>التقييم</InnerTh>
-                        <InnerTh>الملاحظات</InnerTh>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {Object.entries(survey)
-                        .filter(([key]) => key !== 'id' && key !== 'date')
-                        .map(([service, data]) => (
-                          <InnerTr key={service}>
-                            <InnerTd>{service}</InnerTd>
-                            <InnerTd>
-                              <Stars>{renderStars(data.rating)}</Stars>
-                            </InnerTd>
-                            <InnerTd>{data.notes || '-'}</InnerTd>
-                          </InnerTr>
-                        ))}
-                    </tbody>
-                  </InnerTable>
-                </Td>
-              </Tr>
-            ))}
-          </tbody>
-        </Table>
-      )}
+          ))}
+        </tbody>
+      </Table>
     </Container>
   );
 }
