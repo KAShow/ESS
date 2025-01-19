@@ -1,33 +1,23 @@
 import mongoose from 'mongoose';
 
+const serviceSchema = new mongoose.Schema({
+  rating: {
+    type: Number,
+    min: 0,
+    max: 3,
+    required: false
+  },
+  notes: {
+    type: String,
+    required: false
+  }
+});
+
 const surveySchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: false
-  },
-  email: {
-    type: String,
-    required: false
-  },
-  department: {
-    type: String,
-    required: false
-  },
   services: {
     type: Map,
-    of: {
-      rating: {
-        type: Number,
-        min: 1,
-        max: 5,
-        required: false
-      },
-      notes: {
-        type: String,
-        required: false
-      }
-    },
-    required: false
+    of: serviceSchema,
+    required: true
   },
   createdAt: {
     type: Date,
